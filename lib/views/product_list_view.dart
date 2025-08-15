@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:inventario_app/services/data_change_notifier.dart';
 import 'package:inventario_app/services/hive_service.dart';
 import 'package:inventario_app/screens/add_edit_screen.dart';
+import 'package:inventario_app/views/reports_view.dart';
 import 'package:intl/intl.dart';
 
 class ProductListView extends StatefulWidget {
@@ -203,7 +204,7 @@ class _ProductListViewState extends State<ProductListView> {
     );
   }
 
-  Future<void> _showProductDetailsDialog(Map<String, dynamic> product) async {
+  Future<void> _showProductDetailsDialog(Map<String, dynamic> product) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -288,6 +289,8 @@ class _ProductListViewState extends State<ProductListView> {
       appBar: AppBar(
         title: const Text('Inventario Completo'),
         actions: [
+          // --- ACCESO A REPORTES ELIMINADO ---
+          // El botón de reportes ya no está aquí.
           IconButton(
             icon: const Icon(Icons.view_column),
             onPressed: _showColumnSelectionDialog,
@@ -309,18 +312,14 @@ class _ProductListViewState extends State<ProductListView> {
                   ),
                 ],
               )
-            // --- ESTRUCTURA DE SCROLL CORREGIDA ---
             : LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
-                    // 1. Este es el controlador principal VERTICAL. Se lo pasamos a la librería.
                     controller: widget.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: SingleChildScrollView(
-                      // 2. Este es el scroll HORIZONTAL, no tiene controlador para no interferir.
                       scrollDirection: Axis.horizontal,
                       child: ConstrainedBox(
-                        // 3. Aseguramos que la tabla tenga al menos el ancho de la pantalla.
                         constraints: BoxConstraints(
                           minWidth: constraints.maxWidth,
                         ),

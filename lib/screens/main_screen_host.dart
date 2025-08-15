@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:inventario_app/screens/add_edit_screen.dart';
 import 'package:inventario_app/views/product_list_view.dart';
+import 'package:inventario_app/views/reports_view.dart';
 import 'package:inventario_app/views/search_view.dart';
 
 class MainScreenHost extends StatefulWidget {
@@ -12,43 +13,36 @@ class MainScreenHost extends StatefulWidget {
 }
 
 class _MainScreenHostState extends State<MainScreenHost> {
-  late PageController _pageController;
   int _currentPage = 0;
 
   @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _currentPage);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  final List<Widget> _pages = [const SearchView(), const ProductListView()];
-
-  @override
   Widget build(BuildContext context) {
-    // Ahora el Scaffold solo contiene el BottomBar en su cuerpo.
+    // Calculamos el ancho de la barra una sola vez para reutilizarlo
+    final barWidth = MediaQuery.of(context).size.width * 0.85;
+
     return Scaffold(
       body: BottomBar(
-        // El 'child' es el widget flotante. Usamos un Stack para poner el FAB sobre la barra.
         child: Stack(
           alignment: Alignment.center,
-          clipBehavior: Clip.none, // Permite que el FAB se salga de los límites
+          clipBehavior: Clip.none,
           children: [
-            // La barra de navegación como tal
             Container(
               height: 65,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              width: barWidth,
               decoration: BoxDecoration(
-                color: Colors.black, // Color negro como en el ejemplo
+                color: Colors.blue.shade800,
                 borderRadius: BorderRadius.circular(500),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Usamos spaceEvenly para una distribución equitativa
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   _buildTabItem(icon: Icons.search, title: "Buscar", index: 0),
                   _buildTabItem(
@@ -59,11 +53,18 @@ class _MainScreenHostState extends State<MainScreenHost> {
                 ],
               ),
             ),
-            // El FAB posicionado en la parte superior del Stack para que sobresalga
+            // --- POSICIÓN Y FORMA CORREGIDAS ---
             Positioned(
+              // Calculamos la posición para que quede perfectamente centrado en la barra
+              left:
+                  (barWidth / 2) -
+                  28, // (Ancho de la barra / 2) - (Ancho del FAB / 2)
               top: -25,
               child: FloatingActionButton(
-                backgroundColor: Colors.blue, // Color azul como en el ejemplo
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -77,20 +78,37 @@ class _MainScreenHostState extends State<MainScreenHost> {
             ),
           ],
         ),
-        // El 'body' es el contenido principal de la pantalla
-        body: (context, controller) => PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: _pages,
+        body: (context, controller) {
+          switch (_currentPage) {
+            case 0:
+              return SearchView(scrollController: controller);
+            case 1:
+              return ProductListView(scrollController: controller);
+            default:
+              return SearchView(scrollController: controller);
+          }
+        },
+        hideOnScroll: true,
+        showIcon: true,
+        icon: (width, height) => Center(
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            onPressed: null,
+            icon: Icon(
+              Icons.arrow_upward_rounded,
+              color: Colors.white,
+              size: width,
+            ),
+          ),
         ),
-        // Personalización para que se vea como en el ejemplo
+        iconDecoration: BoxDecoration(
+          color: Colors.blue.shade800,
+          borderRadius: BorderRadius.circular(500),
+        ),
         borderRadius: BorderRadius.circular(500),
-        width: MediaQuery.of(context).size.width * 0.85,
+        width: barWidth,
         barAlignment: Alignment.bottomCenter,
-        // Hacemos la barra transparente porque ya le dimos color al Container
         barColor: Colors.transparent,
-        // Desactivamos el ícono de la librería ya que no lo necesitamos
-        showIcon: false,
       ),
     );
   }
@@ -101,22 +119,35 @@ class _MainScreenHostState extends State<MainScreenHost> {
     required int index,
   }) {
     final isSelected = _currentPage == index;
-    // Cambiamos los colores para que coincidan con el fondo oscuro
-    final color = isSelected ? Colors.white : Colors.grey[600];
+    final color = isSelected ? Colors.white : Colors.grey[300];
     return InkWell(
       onTap: () {
-        _pageController.jumpToPage(index);
         setState(() {
           _currentPage = index;
         });
       },
-      child: SizedBox(
-        width: 80,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: isSelected
+            ? BoxDecoration(
+                color: Colors.blue.shade900.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: color, size: 28),
-            Text(title, style: TextStyle(color: color, fontSize: 10)),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ],
         ),
       ),
