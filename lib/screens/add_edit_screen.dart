@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_fast_forms/flutter_fast_forms.dart';
 import 'package:inventario_app/services/hive_service.dart';
-import 'dart:collection'; // Importamos para usar LinkedHashSet y garantizar el orden
+import 'dart:collection';
 
 class AddEditScreen extends StatefulWidget {
   final Map<String, dynamic>? product;
@@ -32,28 +32,27 @@ class _AddEditScreenState extends State<AddEditScreen> {
     final settingsBox = Hive.box('settings');
     final savedColumns = settingsBox.get('visibleColumns') as List<dynamic>?;
 
-    // Usamos un LinkedHashSet para mantener el orden de inserción y evitar duplicados.
     final fieldsToShow = LinkedHashSet<String>();
 
+    // --- MODIFICACIÓN CLAVE ---
+    // Añadimos 'Categoría' como un campo prioritario y fijo.
+    fieldsToShow.add('Categoría');
+
     if (savedColumns != null) {
-      // Añadimos las columnas en el orden en que fueron guardadas
       fieldsToShow.addAll(savedColumns.cast<String>());
     } else {
-      // Si no hay nada guardado, usamos un orden por defecto
       fieldsToShow.addAll(['Modelo', 'Descripción']);
     }
 
     if (_isEditing) {
-      // Si estamos editando, añadimos los campos del producto que no estén ya en la lista
       fieldsToShow.addAll(widget.product!.keys);
     }
 
-    // Excluimos los campos que no deben ser editables por el usuario
-    fieldsToShow.removeWhere((key) => key == 'id' || key == 'fechaRegistro');
+    // Excluimos los campos que no deben ser editables por el usuario.
+    fieldsToShow.removeWhere(
+      (key) => key == 'id' || key == 'fechaRegistro' || key == 'createdAt',
+    );
 
-    // --- CORRECCIÓN CLAVE ---
-    // Convertimos el Set a una Lista SIN reordenarla alfabéticamente.
-    // Esto respeta el orden que definiste en la tabla.
     _formFields = fieldsToShow.toList();
   }
 
@@ -150,9 +149,7 @@ class _AddEditScreenState extends State<AddEditScreen> {
               ),
               const SizedBox(height: 16),
               const Divider(),
-
               ..._buildDynamicFormFields(),
-
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton.icon(
