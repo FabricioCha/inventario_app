@@ -288,9 +288,18 @@ class _ProductListViewState extends State<ProductListView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inventario Completo'),
+        // --- MODIFICACIÓN AQUÍ ---
         actions: [
-          // --- ACCESO A REPORTES ELIMINADO ---
-          // El botón de reportes ya no está aquí.
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ReportsView()),
+              );
+            },
+            tooltip: 'Generar Reporte',
+          ),
           IconButton(
             icon: const Icon(Icons.view_column),
             onPressed: _showColumnSelectionDialog,
