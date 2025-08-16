@@ -14,7 +14,7 @@ class PdfService {
     final ttf = pw.Font.ttf(fontData);
 
     // Definir los encabezados de la tabla
-    final headers = ['Categoría', 'Modelo', 'Descripción', 'Fecha Registro'];
+    final headers = ['Modelo', 'Descripción', 'Fecha Registro'];
 
     pdf.addPage(
       pw.MultiPage(
